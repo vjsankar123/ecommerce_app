@@ -43,7 +43,12 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+     return WillPopScope(
+      onWillPop: () async {
+        // Close the app when the back button is pressed after logout
+        return true; // This will close the app
+      },
+    child:  MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         backgroundColor: Colors.white,
@@ -60,7 +65,8 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ),
       ),
-    );
+    ),
+     );
   }
 
   _header(context) {
@@ -166,12 +172,15 @@ class _LoginPageState extends State<LoginPage> {
   //   );
   // }
 
-  _signup(context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Text("Dont have an account? "),
-        TextButton(
+
+_signup(context) {
+  return Column(
+    children: [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text("Don't have an account? "),
+          TextButton(
             onPressed: () {
               Navigator.push(
                 context,
@@ -183,8 +192,44 @@ class _LoginPageState extends State<LoginPage> {
             child: const Text(
               "Register here",
               style: TextStyle(color: Colors.purple),
-            ))
-      ],
-    );
-  }
+            ),
+          )
+        ],
+      ),
+      const SizedBox(height: 10), // Add spacing
+      // Text.rich(
+      //   TextSpan(
+      //     children: [
+      //       TextSpan(
+      //         text: "Powered by ", 
+      //         style: TextStyle(
+      //           fontSize: 16,
+      //           fontWeight: FontWeight.bold,
+      //           color: Colors.grey, // Custom color for "Powered by"
+      //         ),
+      //       ),
+      //       TextSpan(
+      //         text: "Evv", 
+      //         style: TextStyle(
+      //           fontSize: 20,
+      //           fontWeight: FontWeight.bold,
+      //           color: Colors.orange, // Orange for "Evv"
+      //         ),
+      //       ),
+      //       TextSpan(
+      //         text: "i",
+      //         style: TextStyle(
+      //           fontSize: 20,
+      //           fontWeight: FontWeight.bold,
+      //           color: Color(0xFF12193c), // Blue for "i"
+      //         ),
+      //       ),
+      //     ],
+      //   ),
+      // ),
+    ],
+  );
+}
+
+  
 }

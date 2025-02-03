@@ -1,4 +1,5 @@
 import 'package:ecommerce_app/vendors-dashboard/Bottom_items/create-product/create_product.dart';
+import 'package:ecommerce_app/vendors-dashboard/Bottom_items/product-pages/search_box.dart';
 import 'package:flutter/material.dart';
 import 'product_card.dart';
 
@@ -12,8 +13,8 @@ class ProductCardScreen extends StatefulWidget {
 }
 
 class _ProductCardScreenState extends State<ProductCardScreen> {
-  bool isSearching = false;
-  TextEditingController searchController = TextEditingController();
+  bool _isSearching = false;
+  TextEditingController _searchController = TextEditingController();
 
   List<Map<String, String>> products = [
     {
@@ -90,74 +91,59 @@ class _ProductCardScreenState extends State<ProductCardScreen> {
   }
 
   @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    appBar: AppBar(
-      backgroundColor: Colors.white,
-      title: isSearching
-          ? Container(
-              padding: const EdgeInsets.only(top: 2), // Adjust top padding
-              child: TextField(
-                controller: searchController,
-                autofocus: true,
-                decoration: InputDecoration(
-                  hintText: "Search products...",
-                   border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(20.0),
+  Widget build(BuildContext context) {
+    return Scaffold(
+     appBar: AppBar(
+          title: _isSearching
+              ? SearchWidget(
+                  controller: _searchController,
+                )
+              :FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            'Product List', // Adjusted title for flexibility
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 20,
+              fontWeight: FontWeight.bold, // Bold text for better visibility
             ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(20.0),
-              borderSide: BorderSide(
-                color: Colors.purple,
-                width: 2.0,
-              ),
-            ),
-                ),
-                cursorColor: Colors.purple,
-                onChanged: filterProducts,
-              ),
-            )
-          : const Text(
-              "Product List",
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-      actions: [
-        IconButton(
-          icon: Icon(isSearching ? Icons.close : Icons.search),
-          onPressed: () {
-            setState(() {
-              isSearching = !isSearching;
-              if (!isSearching) {
-                searchController.clear();
-                filteredProducts = products;
-              }
-            });
-          },
+          ),
+          
         ),
-      ],
-      toolbarHeight: isSearching ? 90 : kToolbarHeight, // Adjust the height based on searching state
-    ),
-    backgroundColor: Colors.white,
-    body: ListView(
-      padding: const EdgeInsets.all(10),
-      children: filteredProducts.map((product) {
-        return ProductCard(
-          name: product["name"]!,
-          category: product["category"]!,
-          subcategory: product["subcategory"]!,
-          mrp: product["mrp"]!,
-          imagePath: product["imagePath"]!,
-          color: product["color"]!,
-          size: product["size"]!,
-          stock: product["stock"]!,
-        );
-      }).toList(),
-    ),
-    floatingActionButton: FloatingActionButton(
-      onPressed: _navigateToAddProduct,
-      backgroundColor: Colors.purple,
-      child: Icon(Icons.add, color: Colors.white),
-    ),
-  );
-}
+          actions: [
+            IconButton(
+              icon: Icon(_isSearching ? Icons.cancel : Icons.search),
+              onPressed: () {
+                setState(() {
+                  _isSearching = !_isSearching;
+                  if (!_isSearching) _searchController.clear();
+                });
+              },
+            ),
+          ],
+          backgroundColor: Colors.white,
+        ),
+      backgroundColor: Colors.white,
+      body: ListView(
+        padding: const EdgeInsets.all(10),
+        children: filteredProducts.map((product) {
+          return ProductCard(
+            name: product["name"]!,
+            category: product["category"]!,
+            subcategory: product["subcategory"]!,
+            mrp: product["mrp"]!,
+            imagePath: product["imagePath"]!,
+            color: product["color"]!,
+            size: product["size"]!,
+            stock: product["stock"]!,
+          );
+        }).toList(),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _navigateToAddProduct,
+        backgroundColor: Colors.purple,
+        child: Icon(Icons.add, color: Colors.white),
+      ),
+    );
+  }
 }

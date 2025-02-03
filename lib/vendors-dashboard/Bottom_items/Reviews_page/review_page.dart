@@ -86,9 +86,17 @@ class _VendorReviewPageState extends State<VendorReviewPage> {
         setState(() {
           verifiedState[index] = true;
         });
-        Navigator.of(context).pop(); // Move this outside setState
+        Navigator.of(context).pop();
       },
     );
+  }
+
+  double get averageRating {
+    double totalRating = 0;
+    for (var review in reviews) {
+      totalRating += review.rating;
+    }
+    return totalRating / reviews.length;
   }
 
   @override
@@ -97,14 +105,14 @@ class _VendorReviewPageState extends State<VendorReviewPage> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        centerTitle: true,
+        // centerTitle: true,
         title: Text(
           'Reviews',
           style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
+              color: Colors.black,
+              fontSize: 20,
+              fontWeight: FontWeight.bold, // Bold text for better visibility
+            ),
         ),
         iconTheme: IconThemeData(color: Colors.black),
       ),
@@ -115,18 +123,15 @@ class _VendorReviewPageState extends State<VendorReviewPage> {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
-                // **Stats Cards Section**
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _buildStatCard("Total Reviews", "10.0k", "⬆ 21%", Colors.blue),
-                    _buildStatCard("Average Rating", "4.0 ⭐", "", Colors.orange),
-                  ],
+                // **Vendor Rating Summary**
+                RatingSummary(
+                  rating: averageRating,
+                  totalReviews: reviews.length,
+                  starCounts: List.generate(5, (index) {
+                    return reviews.where((review) => review.rating.floor() == 5 - index).length;
+                  }),
                 ),
-                SizedBox(height: 12),
-                _buildRatingBreakdown(),
-
- SizedBox(height: 15),
+                SizedBox(height: 15),
                 // **Reviews List**
                 Expanded(
                   child: ListView.builder(
@@ -287,19 +292,45 @@ class _VendorReviewPageState extends State<VendorReviewPage> {
       ),
     );
   }
+}
+class RatingSummary extends StatelessWidget {
+  final double rating;
+  final int totalReviews;
+  final List<int> starCounts;
 
-  // **Stat Card Widget**
-  Widget _buildStatCard(String title, String value, String change, Color color) {
-    return Expanded(
-      child: Container(
-        padding: EdgeInsets.all(12),
-        margin: EdgeInsets.symmetric(horizontal: 4), // Equal margin on both sides
-        constraints: BoxConstraints(minHeight: 110), // Ensuring both cards have the same height
-        decoration: BoxDecoration(
+  RatingSummary({
+    required this.rating,
+    required this.totalReviews,
+    required this.starCounts,
+  });
+
+  // Method to build stat card
+  Widget _buildStatCard(String title, String value, String percentage, Color color) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(title, style: TextStyle(fontSize: 14, color: Colors.grey)),
+        Text(value, style: TextStyle(fontSize: 16, color: color)),
+        if (percentage.isNotEmpty)
+          Text(percentage, style: TextStyle(fontSize: 14, color: color)),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.black, width: 2),
-          boxShadow: [
+          border: Border(
+            top: const BorderSide(color: Colors.black, width: 2.0),
+            left: const BorderSide(color: Colors.black, width: 2.0),
+            right: const BorderSide(color: Colors.black, width: 2.0),
+            bottom: const BorderSide(color: Colors.black, width: 5.0),
+          ),
+          boxShadow: const [
             BoxShadow(
               color: Colors.black26,
               blurRadius: 6.0,
@@ -307,72 +338,45 @@ class _VendorReviewPageState extends State<VendorReviewPage> {
             ),
           ],
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(
-              title,
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 5),
-            Text(
-              value,
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: color),
-            ),
-            if (change.isNotEmpty)
-              Text(
-                change,
-                style: TextStyle(fontSize: 14, color: Colors.green, fontWeight: FontWeight.bold),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // **Rating Breakdown Widget**
-  Widget _buildRatingBreakdown() {
-    return Container(
-      padding: EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.black, width: 2),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black26,
-            blurRadius: 6.0,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
+      width: 500,  // Increased width here
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "Rating Breakdown",
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          _buildStatCard("Total Reviews", "10.0k", "⬆ 21%", Colors.blue),
+          _buildStatCard("Average Rating", "4.0 ⭐", "", Colors.orange),
+          SizedBox(height: 8),
+          Row(
+            children: List.generate(5, (index) {
+              return Icon(
+                index < rating.floor()
+                    ? Icons.star
+                    : index < rating
+                        ? Icons.star_half
+                        : Icons.star_border,
+                color: Colors.amber,
+              );
+            }),
           ),
           SizedBox(height: 8),
-          _buildRatingRow(5, "2.0k"),
-          _buildRatingRow(4, "1.0k"),
-          _buildRatingRow(3, "500"),
-          _buildRatingRow(2, "200"),
-          _buildRatingRow(1, "0"),
-        ],
-      ),
-    );
-  }
-
-  // **Rating Row Widget**
-  Widget _buildRatingRow(int stars, String count) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        children: [
-          Text("$stars ⭐"),
-          Spacer(),
-          Text(count, style: TextStyle(fontWeight: FontWeight.bold)),
+          Column(
+            children: List.generate(5, (index) {
+              return Row(
+                children: [
+                  Text('${5 - index} Star', style: TextStyle(fontSize: 14)),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: LinearProgressIndicator(
+                      borderRadius: BorderRadius.circular(20),
+                      value: starCounts[index] / totalReviews,
+                      backgroundColor: Colors.grey[300],
+                      color: Colors.amber,
+                      minHeight: 6,
+                    ),
+                  ),
+                ],
+              );
+            }),
+          ),
         ],
       ),
     );
